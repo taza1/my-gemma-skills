@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body>
+<script>
+// ---- inlined from src/shared/skill-runtime.js ----
+// Shared runtime for every skill. Inlined into each skill's index.html by scripts/build.js.
+// Contract (docs/TECHNICAL-RESEARCH.md s4): ai_edge_gallery_get_result(data) returns a JSON
+// string containing ONLY { result } or { error }; unknown fields make the app discard the shape.
+
+class SkillError extends Error {}
+
+function parseInput(data) {
+  if (typeof data !== 'string' || data.trim() === '') {
+    throw new SkillError('No input received. Expected a JSON object.');
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(data);
+  } catch (e) {
+    throw new SkillError('Input is not valid JSON.');
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new SkillError('Input must be a JSON object.');
+  }
+  return parsed;
+}
+
+function requireString(input, field) {
+  const v = input[field];
+  if (v === undefined || v === null) throw new SkillError(`Missing field '${field}'.`);
+  if (typeof v !== 'string' && typeof v !== 'number') {
+    throw new SkillError(`Field '${field}' must be text.`);
+  }
+  const s = String(v).trim();
+  if (s === '') throw new SkillError(`Field '${field}' is empty.`);
+  return s;
+}
+
+function requireNumber(input, field) {
+  const v = input[field];
+  if (v === undefined || v === null) throw new SkillError(`Missing field '${field}'.`);
+  if (typeof v === 'string' && v.trim() === '') throw new SkillError(`Field '${field}' is empty.`);
+  const n = typeof v === 'string' ? Number(v.trim()) : v;
+  if (typeof n !== 'number' || !Number.isFinite(n)) {
+    throw new SkillError(`Field '${field}' must be a finite number.`);
+  }
+  return n;
+}
+
+function registerSkill(handler) {
+  window['ai_edge_gallery_get_result'] = async (data) => {
+    try {
+      const out = await handler(parseInput(data));
+      return JSON.stringify({ result: String(out) });
+    } catch (e) {
+      if (e instanceof SkillError) return JSON.stringify({ error: e.message });
+      console.error(e);
+      return JSON.stringify({ error: 'Unexpected error in skill.' });
+    }
+  };
+}
+
+// ---- inlined from src/shared/format.js ----
+// Number formatting for phone-sized output. Inlined into skills by scripts/build.js.
+// Policy: 7 significant digits, plain notation for 1e-6 <= |n| < 1e15, otherwise scientific.
+
+function formatNumber(n) {
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 1e15 || abs < 1e-6) {
+    return n.toExponential(4).replace(/\.?0+e/, 'e').replace('e+', 'e');
+  }
+  return String(Number(n.toPrecision(7)));
+}
+
+
+// factor = how many BASE units one of this unit is. Base: m, kg, L, m/s, m2, byte, s.
+// Aliases are matched after normalising (lowercase, no spaces, no degree sign, ASCII digits).
+// Data note: KB/MB/GB/TB are decimal (1000); KiB/MiB/GiB/TiB are binary (1024).
+const CATEGORIES = {
+  length: { base: 'm', units: {
+    mm: [0.001, 'millimeter millimetre millimeters millimetres'],
+    cm: [0.01, 'centimeter centimetre centimeters centimetres'],
+    m: [1, 'meter metre meters metres'],
+    km: [1000, 'kilometer kilometre kilometers kilometres kilometers'],
+    in: [0.0254, 'inch inches'],
+    ft: [0.3048, 'foot feet'],
+    yd: [0.9144, 'yard yards'],
+    mi: [1609.344, 'mile miles'],
+    nmi: [1852, 'nauticalmile nauticalmiles'] } },
+  mass: { base: 'kg', units: {
+    mg: [1e-6, 'milligram milligrams'],
+    g: [0.001, 'gram grams'],
+    kg: [1, 'kilogram kilograms kilo kilos'],
+    t: [1000, 'tonne tonnes metricton'],
+    oz: [0.028349523125, 'ounce ounces'],
+    lb: [0.45359237, 'pound pounds lbs'],
+    st: [6.35029318, 'stone stones'] } },
+  volume: { base: 'L', units: {
+    ml: [0.001, 'milliliter millilitre milliliters millilitres'],
+    cl: [0.01, 'centiliter centilitre'],
+    l: [1, 'liter litre liters litres'],
+    m3: [1000, 'cubicmeter cubicmetre'],
+    tsp: [0.00492892159375, 'teaspoon teaspoons'],
+    tbsp: [0.01478676478125, 'tablespoon tablespoons'],
+    floz: [0.0295735295625, 'fluidounce fluidounces usfloz'],
+    cup: [0.2365882365, 'cups uscup'],
+    pt: [0.473176473, 'pint pints uspint'],
+    gal: [3.785411784, 'gallon gallons usgallon usgal'],
+    ukgal: [4.54609, 'imperialgallon imperialgallons ukgallon'] } },
+  speed: { base: 'm/s', units: {
+    'm/s': [1, 'mps meterpersecond meterspersecond'],
+    'km/h': [1 / 3.6, 'kph kmh kmph kilometerperhour kilometersperhour'],
+    mph: [0.44704, 'milesperhour mi/h'],
+    kn: [1852 / 3600, 'knot knots kt kts'],
+    'ft/s': [0.3048, 'fps feetpersecond'] } },
+  area: { base: 'm2', units: {
+    cm2: [0.0001, 'squarecentimeter squarecentimetre sqcm'],
+    m2: [1, 'squaremeter squaremetre sqm'],
+    ha: [10000, 'hectare hectares'],
+    km2: [1e6, 'squarekilometer squarekilometre sqkm'],
+    in2: [0.00064516, 'squareinch sqin'],
+    ft2: [0.09290304, 'squarefoot squarefeet sqft'],
+    yd2: [0.83612736, 'squareyard sqyd'],
+    ac: [4046.8564224, 'acre acres'],
+    mi2: [2589988.110336, 'squaremile sqmi'] } },
+  data: { base: 'byte', units: {
+    bit: [0.125, 'bits'],
+    kbit: [125, 'kilobit kilobits'],
+    mbit: [125000, 'megabit megabits'],
+    gbit: [125000000, 'gigabit gigabits'],
+    b: [1, 'byte bytes'],
+    kb: [1e3, 'kilobyte kilobytes'],
+    mb: [1e6, 'megabyte megabytes'],
+    gb: [1e9, 'gigabyte gigabytes'],
+    tb: [1e12, 'terabyte terabytes'],
+    kib: [1024, 'kibibyte kibibytes'],
+    mib: [1048576, 'mebibyte mebibytes'],
+    gib: [1073741824, 'gibibyte gibibytes'],
+    tib: [1099511627776, 'tebibyte tebibytes'] } },
+  time: { base: 's', units: {
+    ms: [0.001, 'millisecond milliseconds'],
+    s: [1, 'sec second seconds secs'],
+    min: [60, 'minute minutes mins'],
+    h: [3600, 'hr hour hours hrs'],
+    d: [86400, 'day days'],
+    wk: [604800, 'week weeks'],
+    yr: [31557600, 'year years'] } },
+  temperature: { base: 'K', units: {
+    c: [null, 'celsius centigrade degc degreecelsius degreescelsius'],
+    f: [null, 'fahrenheit degf degreefahrenheit degreesfahrenheit'],
+    k: [null, 'kelvin kelvins'] } },
+};
+
+// Display labels where the lookup key is not how people write the unit.
+const LABELS = {
+  c: '°C', f: '°F', k: 'K', l: 'L', ml: 'mL', cl: 'cL', b: 'B', kb: 'KB', mb: 'MB', gb: 'GB',
+  tb: 'TB', kib: 'KiB', mib: 'MiB', gib: 'GiB', tib: 'TiB', kbit: 'kbit', mbit: 'Mbit',
+  gbit: 'Gbit', floz: 'fl oz', ukgal: 'UK gal', gal: 'US gal', pt: 'US pt', cup: 'US cup',
+};
+
+const LOOKUP = (() => {
+  const map = {};
+  for (const [category, def] of Object.entries(CATEGORIES)) {
+    for (const [key, [factor, aliases]] of Object.entries(def.units)) {
+      const entry = { category, key, factor, label: LABELS[key] || key };
+      map[normaliseUnit(key)] = entry;
+      for (const a of aliases.split(' ')) if (a) map[normaliseUnit(a)] = entry;
+    }
+  }
+  return map;
+})();
+
+function normaliseUnit(s) {
+  return String(s).toLowerCase().replace(/[\s°.]/g, '').replace(/²/g, '2').replace(/³/g, '3')
+    .replace(/µ/g, 'u');
+}
+
+function findUnit(raw, field) {
+  const n = normaliseUnit(raw);
+  let hit = LOOKUP[n];
+  // Tolerate a plural the alias list does not spell out ("kms", "inches" -> "inch").
+  if (!hit && n.endsWith('es')) hit = LOOKUP[n.slice(0, -2)];
+  if (!hit && n.endsWith('s')) hit = LOOKUP[n.slice(0, -1)];
+  if (!hit) {
+    throw new SkillError(
+      `Unknown unit '${raw}' in '${field}'. Examples: km, m, mi, kg, lb, C, F, L, gal, km/h, mph, GB, MiB, h, min.`);
+  }
+  return hit;
+}
+
+function toKelvin(key, v) {
+  const k = key === 'c' ? v + 273.15 : key === 'f' ? (v - 32) * 5 / 9 + 273.15 : v;
+  if (k < -1e-9) {
+    throw new SkillError(`${formatNumber(v)} ${LABELS[key]} is below absolute zero.`);
+  }
+  return k < 0 ? 0 : k;
+}
+
+function fromKelvin(key, k) {
+  return key === 'c' ? k - 273.15 : key === 'f' ? (k - 273.15) * 9 / 5 + 32 : k;
+}
+
+function convert(input) {
+  const value = requireNumber(input, 'value');
+  const from = findUnit(requireString(input, 'from'), 'from');
+  const to = findUnit(requireString(input, 'to'), 'to');
+  if (from.category !== to.category) {
+    throw new SkillError(
+      `Cannot convert ${from.label} (${from.category}) to ${to.label} (${to.category}). ` +
+      'Both units must measure the same thing.');
+  }
+  let result;
+  if (from.category === 'temperature') {
+    result = fromKelvin(to.key, toKelvin(from.key, value));
+  } else {
+    result = value * from.factor / to.factor;
+  }
+  if (!Number.isFinite(result)) throw new SkillError('Result is too large to represent.');
+  let line = `${formatNumber(value)} ${from.label} = ${formatNumber(result)} ${to.label}`;
+  if (from.category === 'data') line += ' (KB/MB/GB = 1000-based; KiB/MiB/GiB = 1024-based)';
+  if (from.key === 'yr' || to.key === 'yr') line += ' (1 year = 365.25 days)';
+  return line;
+}
+
+registerSkill(convert);
+
+</script>
+</body>
+</html>

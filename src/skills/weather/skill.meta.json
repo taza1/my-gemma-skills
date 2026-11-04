@@ -1,0 +1,6 @@
+{
+  "type": "JavaScript",
+  "network": "open-meteo.com, met.ie",
+  "secret": "none",
+  "status": "Tested locally"
+}

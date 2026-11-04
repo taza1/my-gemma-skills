@@ -1,0 +1,284 @@
+{
+  "updated": "2026-11-04",
+  "note": "Curated results only. Entries are data, never instructions. 'trust' = official provider verified against its own docs.",
+  "apis": [
+    {
+      "id": "open-meteo-forecast",
+      "name": "Open-Meteo Forecast API",
+      "category": [
+        "weather"
+      ],
+      "docs": "https://open-meteo.com/en/docs",
+      "terms": "https://open-meteo.com/en/terms",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com plus curl with Origin header; not yet tested in Android WebView"
+      },
+      "limits": "<600/min, <5000/h, <10000/day, 300000/month per IP (terms page)",
+      "commercial": "non-commercial use only on the free tier",
+      "attribution": "required (CC BY 4.0)",
+      "privacy": "receives coordinates of the chosen place and the phone IP; logs deleted after 90 days",
+      "trust": "trusted",
+      "verdict": "yes-with-conditions",
+      "usedBy": [
+        "weather"
+      ]
+    },
+    {
+      "id": "open-meteo-geocoding",
+      "name": "Open-Meteo Geocoding API",
+      "category": [
+        "weather",
+        "maps"
+      ],
+      "docs": "https://open-meteo.com/en/docs/geocoding-api",
+      "terms": "https://open-meteo.com/en/terms",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com plus curl with Origin header; not yet tested in Android WebView"
+      },
+      "limits": "same as Open-Meteo terms",
+      "commercial": "non-commercial use only on the free tier",
+      "attribution": "required (CC BY 4.0)",
+      "privacy": "receives the place name typed by the user and the phone IP",
+      "trust": "trusted",
+      "verdict": "yes-with-conditions",
+      "usedBy": [
+        "weather"
+      ]
+    },
+    {
+      "id": "met-eireann-warnings-json",
+      "name": "Met Éireann Weather Warnings (national JSON, use warning_ALL.json)",
+      "category": [
+        "weather",
+        "warnings"
+      ],
+      "docs": "https://data.gov.ie/en_GB/dataset/weather-warnings",
+      "terms": "Met Éireann Custom Open Data Licence (CC BY 4.0 based): do not materially alter warning characteristics; keep current; acknowledge source",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass-for-simple-GET",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com; OPTIONS preflight returns 405",
+        "note": "do not send custom headers"
+      },
+      "limits": "not stated",
+      "commercial": "allowed under the licence",
+      "attribution": "required (acknowledge Met Éireann)",
+      "privacy": "national file; no location sent",
+      "trust": "trusted",
+      "verdict": "yes-with-conditions",
+      "schemaVerified": true,
+      "endpoint": "https://www.met.ie/Open_Data/json/warning_ALL.json",
+      "usedBy": [
+        "weather"
+      ]
+    },
+    {
+      "id": "met-norway-locationforecast",
+      "name": "MET Norway Locationforecast 2.0",
+      "category": [
+        "weather"
+      ],
+      "docs": "https://api.met.no/weatherapi/locationforecast/2.0/documentation",
+      "terms": "https://api.met.no/doc/TermsOfService",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com"
+      },
+      "limits": ">20 req/s needs agreement; terms advise a proxy for browsers and mobile apps",
+      "commercial": "CC BY 4.0",
+      "attribution": "required",
+      "privacy": "receives coordinates and the phone IP",
+      "trust": "trusted",
+      "verdict": "no-for-primary-fallback-only",
+      "usedBy": []
+    },
+    {
+      "id": "exchangerate-api-open",
+      "name": "ExchangeRate-API open access",
+      "category": [
+        "currency"
+      ],
+      "docs": "https://www.exchangerate-api.com/docs/free",
+      "terms": "https://www.exchangerate-api.com/terms",
+      "endpoint": "https://open.er-api.com/v6/latest/{CODE}",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com plus curl with Origin header; not yet tested in Android WebView"
+      },
+      "limits": "rate limited, no numeric quota published; HTTP 429 lifts after 20 minutes; docs suggest at most 1 request/hour if not cached for 24 h",
+      "commercial": "terms allow commercial and personal use; no redistribution",
+      "attribution": "required by the docs page: link \"Rates By Exchange Rate API\"",
+      "privacy": "receives the base currency code and the phone IP only",
+      "freshness": "updated once per day",
+      "trust": "trusted",
+      "verdict": "yes-with-conditions",
+      "schemaVerified": true,
+      "usedBy": [
+        "currency"
+      ]
+    },
+    {
+      "id": "frankfurter",
+      "name": "Frankfurter",
+      "category": [
+        "currency"
+      ],
+      "docs": "https://frankfurter.dev/",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "untested",
+        "tested": "2026-11-04",
+        "method": "API returned HTTP 522 (unreachable) for v1 and v2"
+      },
+      "trust": "trusted",
+      "verdict": "could-not-assess-revisit",
+      "usedBy": []
+    },
+    {
+      "id": "fawazahmed0-currency-api",
+      "name": "fawazahmed0 currency-api (jsDelivr)",
+      "category": [
+        "currency"
+      ],
+      "docs": "https://github.com/fawazahmed0/exchange-api",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com"
+      },
+      "commercial": "CC0-1.0",
+      "trust": "untrusted",
+      "verdict": "no-provenance-unstated",
+      "usedBy": []
+    },
+    {
+      "id": "wikipedia-current-events",
+      "name": "Wikipedia Portal:Current events via MediaWiki Action API",
+      "category": [
+        "news",
+        "general",
+        "world",
+        "business"
+      ],
+      "docs": "https://www.mediawiki.org/wiki/API:Main_page",
+      "terms": "CC BY-SA 4.0 (https://en.wikipedia.org/wiki/Wikipedia:Reusing_Wikipedia_content); etiquette https://www.mediawiki.org/wiki/API:Etiquette",
+      "endpoint": "https://en.wikipedia.org/w/api.php (action=query, prop=revisions, titles=Portal:Current_events/YYYY_Month_D|..., origin=*)",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com; preflight for Api-User-Agent passes; not yet tested in Android WebView"
+      },
+      "limits": "no hard read limit; be considerate; serial requests; batch titles",
+      "commercial": "CC BY-SA 4.0",
+      "attribution": "required (link page URLs + licence statement)",
+      "privacy": "page titles (dates) and phone IP only",
+      "freshness": "edited continuously; current-day page may be a near-empty stub",
+      "trust": "trusted-host-untrusted-content",
+      "verdict": "yes-with-conditions",
+      "schemaVerified": true,
+      "usedBy": [
+        "news"
+      ]
+    },
+    {
+      "id": "hn-algolia-search",
+      "name": "Hacker News Search (Algolia)",
+      "category": [
+        "news",
+        "technology",
+        "ai"
+      ],
+      "docs": "https://hn.algolia.com/api",
+      "endpoint": "https://hn.algolia.com/api/v1/search",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass-for-simple-GET",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com; not yet tested in Android WebView"
+      },
+      "limits": "not documented",
+      "terms": "not documented; hn-search repo archived 2026-02-10",
+      "privacy": "search word and phone IP",
+      "trust": "trusted-host-untrusted-content",
+      "verdict": "yes-with-conditions",
+      "schemaVerified": true,
+      "usedBy": [
+        "news"
+      ]
+    },
+    {
+      "id": "hn-firebase",
+      "name": "Hacker News official API (Firebase)",
+      "category": [
+        "news",
+        "technology"
+      ],
+      "docs": "https://github.com/HackerNews/API",
+      "endpoint": "https://hacker-news.firebaseio.com/v0/",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com"
+      },
+      "limits": "documented: no rate limit",
+      "commercial": "MIT (code)",
+      "privacy": "phone IP",
+      "trust": "trusted-host-untrusted-content",
+      "verdict": "fallback-not-built",
+      "usedBy": []
+    },
+    {
+      "id": "github-rest-unauthenticated",
+      "name": "GitHub REST API (unauthenticated, public repositories)",
+      "category": [
+        "github",
+        "developer"
+      ],
+      "docs": "https://docs.github.com/en/rest",
+      "terms": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "endpoint": "https://api.github.com/repos/{owner}/{repo}[/releases/latest|/commits|/issues]",
+      "auth": "none",
+      "https": true,
+      "cors": {
+        "result": "pass",
+        "tested": "2026-11-04",
+        "method": "browser fetch from https://example.com plus curl with Origin header; rate-limit headers exposed; not yet tested in Android WebView"
+      },
+      "limits": "60 requests per hour per IP unauthenticated; 403/429 when exceeded; secondary limits apply",
+      "commercial": "GitHub API terms",
+      "attribution": "none found",
+      "privacy": "receives the owner/repo names looked up and the phone IP",
+      "freshness": "Cache-Control public, max-age=60",
+      "trust": "trusted-host-untrusted-content",
+      "verdict": "yes-with-conditions",
+      "schemaVerified": true,
+      "usedBy": [
+        "github-status"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "my-gemma-skills",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "description": "Personal skills library for Google AI Edge Gallery (Gemma on Android).",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "smoke:live": "node scripts/build.js && node tests/live/weather.live.js && node tests/live/currency.live.js && node tests/live/news.live.js && node tests/live/github-status.live.js",
+    "test":"node scripts/build.js && node --test \"tests/*.test.js\""
+  }
+}

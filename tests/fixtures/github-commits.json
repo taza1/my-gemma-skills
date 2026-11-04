@@ -1,0 +1,412 @@
+[
+  {
+    "sha": "9acbd4e1719924d7c7bb2f292cfdbe28a8224354",
+    "node_id": "C_kwDOORv_S9oAKDlhY2JkNGUxNzE5OTI0ZDdjN2JiMmYyOTJjZmRiZTI4YTgyMjQzNTQ",
+    "commit": {
+      "author": {
+        "name": "Google AI Edge Gallery",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-04T08:50:23Z"
+      },
+      "committer": {
+        "name": "Copybara-Service",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-04T08:51:02Z"
+      },
+      "message": "Notify that a model download paused, rather than failed, when a network error interrupts it in the background.\n\nPiperOrigin-RevId: 1013634320",
+      "tree": {
+        "sha": "4a9b06f064eb4605ed6e10beb9d140b2b634ccde",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/git/trees/4a9b06f064eb4605ed6e10beb9d140b2b634ccde"
+      },
+      "url": "https://api.github.com/repos/google-ai-edge/gallery/git/commits/9acbd4e1719924d7c7bb2f292cfdbe28a8224354",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/9acbd4e1719924d7c7bb2f292cfdbe28a8224354",
+    "html_url": "https://github.com/google-ai-edge/gallery/commit/9acbd4e1719924d7c7bb2f292cfdbe28a8224354",
+    "comments_url": "https://api.github.com/repos/google-ai-edge/gallery/commits/9acbd4e1719924d7c7bb2f292cfdbe28a8224354/comments",
+    "author": {
+      "login": "a-googler",
+      "id": 20343323,
+      "node_id": "MDQ6VXNlcjIwMzQzMzIz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20343323?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/a-googler",
+      "html_url": "https://github.com/a-googler",
+      "followers_url": "https://api.github.com/users/a-googler/followers",
+      "following_url": "https://api.github.com/users/a-googler/following{/other_user}",
+      "gists_url": "https://api.github.com/users/a-googler/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/a-googler/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/a-googler/subscriptions",
+      "organizations_url": "https://api.github.com/users/a-googler/orgs",
+      "repos_url": "https://api.github.com/users/a-googler/repos",
+      "events_url": "https://api.github.com/users/a-googler/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/a-googler/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "copybara-github",
+      "id": 32201506,
+      "node_id": "MDQ6VXNlcjMyMjAxNTA2",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32201506?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/copybara-github",
+      "html_url": "https://github.com/copybara-github",
+      "followers_url": "https://api.github.com/users/copybara-github/followers",
+      "following_url": "https://api.github.com/users/copybara-github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/copybara-github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/copybara-github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/copybara-github/subscriptions",
+      "organizations_url": "https://api.github.com/users/copybara-github/orgs",
+      "repos_url": "https://api.github.com/users/copybara-github/repos",
+      "events_url": "https://api.github.com/users/copybara-github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/copybara-github/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "9dc52652ce29b7f49b477ca84af1d97a7ea82329",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/9dc52652ce29b7f49b477ca84af1d97a7ea82329",
+        "html_url": "https://github.com/google-ai-edge/gallery/commit/9dc52652ce29b7f49b477ca84af1d97a7ea82329"
+      }
+    ]
+  },
+  {
+    "sha": "9dc52652ce29b7f49b477ca84af1d97a7ea82329",
+    "node_id": "C_kwDOORv_S9oAKDlkYzUyNjUyY2UyOWI3ZjQ5YjQ3N2NhODRhZjFkOTdhN2VhODIzMjk",
+    "commit": {
+      "author": {
+        "name": "Google AI Edge Gallery",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T22:35:15Z"
+      },
+      "committer": {
+        "name": "Copybara-Service",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T22:36:09Z"
+      },
+      "message": "Shorten \"Stop download?\" confirmation dialog button labels to \"Keep\" and \"Stop\" so both actions fit side by side on a single row.\n\nPiperOrigin-RevId: 1013301022",
+      "tree": {
+        "sha": "d352bc5c075925087985ca092cded31a7a9fc172",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/git/trees/d352bc5c075925087985ca092cded31a7a9fc172"
+      },
+      "url": "https://api.github.com/repos/google-ai-edge/gallery/git/commits/9dc52652ce29b7f49b477ca84af1d97a7ea82329",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/9dc52652ce29b7f49b477ca84af1d97a7ea82329",
+    "html_url": "https://github.com/google-ai-edge/gallery/commit/9dc52652ce29b7f49b477ca84af1d97a7ea82329",
+    "comments_url": "https://api.github.com/repos/google-ai-edge/gallery/commits/9dc52652ce29b7f49b477ca84af1d97a7ea82329/comments",
+    "author": {
+      "login": "a-googler",
+      "id": 20343323,
+      "node_id": "MDQ6VXNlcjIwMzQzMzIz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20343323?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/a-googler",
+      "html_url": "https://github.com/a-googler",
+      "followers_url": "https://api.github.com/users/a-googler/followers",
+      "following_url": "https://api.github.com/users/a-googler/following{/other_user}",
+      "gists_url": "https://api.github.com/users/a-googler/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/a-googler/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/a-googler/subscriptions",
+      "organizations_url": "https://api.github.com/users/a-googler/orgs",
+      "repos_url": "https://api.github.com/users/a-googler/repos",
+      "events_url": "https://api.github.com/users/a-googler/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/a-googler/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "copybara-github",
+      "id": 32201506,
+      "node_id": "MDQ6VXNlcjMyMjAxNTA2",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32201506?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/copybara-github",
+      "html_url": "https://github.com/copybara-github",
+      "followers_url": "https://api.github.com/users/copybara-github/followers",
+      "following_url": "https://api.github.com/users/copybara-github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/copybara-github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/copybara-github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/copybara-github/subscriptions",
+      "organizations_url": "https://api.github.com/users/copybara-github/orgs",
+      "repos_url": "https://api.github.com/users/copybara-github/repos",
+      "events_url": "https://api.github.com/users/copybara-github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/copybara-github/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "95a90632f7f7bf35aa428426c28414a4b13f3626",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/95a90632f7f7bf35aa428426c28414a4b13f3626",
+        "html_url": "https://github.com/google-ai-edge/gallery/commit/95a90632f7f7bf35aa428426c28414a4b13f3626"
+      }
+    ]
+  },
+  {
+    "sha": "95a90632f7f7bf35aa428426c28414a4b13f3626",
+    "node_id": "C_kwDOORv_S9oAKDk1YTkwNjMyZjdmN2JmMzVhYTQyODQyNmMyODQxNGE0YjEzZjM2MjY",
+    "commit": {
+      "author": {
+        "name": "Google AI Edge Gallery",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T18:24:21Z"
+      },
+      "committer": {
+        "name": "Copybara-Service",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T18:25:49Z"
+      },
+      "message": "Bump Android app version code to 52.\n\nPiperOrigin-RevId: 1013116850",
+      "tree": {
+        "sha": "157a7f73f51408759c11d274645248aca295eb6c",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/git/trees/157a7f73f51408759c11d274645248aca295eb6c"
+      },
+      "url": "https://api.github.com/repos/google-ai-edge/gallery/git/commits/95a90632f7f7bf35aa428426c28414a4b13f3626",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/95a90632f7f7bf35aa428426c28414a4b13f3626",
+    "html_url": "https://github.com/google-ai-edge/gallery/commit/95a90632f7f7bf35aa428426c28414a4b13f3626",
+    "comments_url": "https://api.github.com/repos/google-ai-edge/gallery/commits/95a90632f7f7bf35aa428426c28414a4b13f3626/comments",
+    "author": {
+      "login": "a-googler",
+      "id": 20343323,
+      "node_id": "MDQ6VXNlcjIwMzQzMzIz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20343323?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/a-googler",
+      "html_url": "https://github.com/a-googler",
+      "followers_url": "https://api.github.com/users/a-googler/followers",
+      "following_url": "https://api.github.com/users/a-googler/following{/other_user}",
+      "gists_url": "https://api.github.com/users/a-googler/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/a-googler/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/a-googler/subscriptions",
+      "organizations_url": "https://api.github.com/users/a-googler/orgs",
+      "repos_url": "https://api.github.com/users/a-googler/repos",
+      "events_url": "https://api.github.com/users/a-googler/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/a-googler/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "copybara-github",
+      "id": 32201506,
+      "node_id": "MDQ6VXNlcjMyMjAxNTA2",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32201506?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/copybara-github",
+      "html_url": "https://github.com/copybara-github",
+      "followers_url": "https://api.github.com/users/copybara-github/followers",
+      "following_url": "https://api.github.com/users/copybara-github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/copybara-github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/copybara-github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/copybara-github/subscriptions",
+      "organizations_url": "https://api.github.com/users/copybara-github/orgs",
+      "repos_url": "https://api.github.com/users/copybara-github/repos",
+      "events_url": "https://api.github.com/users/copybara-github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/copybara-github/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56",
+        "html_url": "https://github.com/google-ai-edge/gallery/commit/e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56"
+      }
+    ]
+  },
+  {
+    "sha": "e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56",
+    "node_id": "C_kwDOORv_S9oAKGUwYmI2YzFmZDNlMzRhN2JhNzQ5YTZkMmY5YWNkZTFiN2JlMDZiNTY",
+    "commit": {
+      "author": {
+        "name": "Zichuan Wei",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T17:06:06Z"
+      },
+      "committer": {
+        "name": "Copybara-Service",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T17:07:15Z"
+      },
+      "message": "Support PDF attachments in AI Chat with sandboxed text extraction and viewing\n\nPiperOrigin-RevId: 1013061289",
+      "tree": {
+        "sha": "5a83aeb58d2411693fd25b6d5517eba74b394025",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/git/trees/5a83aeb58d2411693fd25b6d5517eba74b394025"
+      },
+      "url": "https://api.github.com/repos/google-ai-edge/gallery/git/commits/e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56",
+    "html_url": "https://github.com/google-ai-edge/gallery/commit/e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56",
+    "comments_url": "https://api.github.com/repos/google-ai-edge/gallery/commits/e0bb6c1fd3e34a7ba749a6d2f9acde1b7be06b56/comments",
+    "author": {
+      "login": "zichuan-wei",
+      "id": 10928342,
+      "node_id": "MDQ6VXNlcjEwOTI4MzQy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10928342?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/zichuan-wei",
+      "html_url": "https://github.com/zichuan-wei",
+      "followers_url": "https://api.github.com/users/zichuan-wei/followers",
+      "following_url": "https://api.github.com/users/zichuan-wei/following{/other_user}",
+      "gists_url": "https://api.github.com/users/zichuan-wei/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/zichuan-wei/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/zichuan-wei/subscriptions",
+      "organizations_url": "https://api.github.com/users/zichuan-wei/orgs",
+      "repos_url": "https://api.github.com/users/zichuan-wei/repos",
+      "events_url": "https://api.github.com/users/zichuan-wei/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/zichuan-wei/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "copybara-github",
+      "id": 32201506,
+      "node_id": "MDQ6VXNlcjMyMjAxNTA2",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32201506?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/copybara-github",
+      "html_url": "https://github.com/copybara-github",
+      "followers_url": "https://api.github.com/users/copybara-github/followers",
+      "following_url": "https://api.github.com/users/copybara-github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/copybara-github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/copybara-github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/copybara-github/subscriptions",
+      "organizations_url": "https://api.github.com/users/copybara-github/orgs",
+      "repos_url": "https://api.github.com/users/copybara-github/repos",
+      "events_url": "https://api.github.com/users/copybara-github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/copybara-github/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "8e4353e838f8d87578cc166a5bb5d2e92843d9f9",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/8e4353e838f8d87578cc166a5bb5d2e92843d9f9",
+        "html_url": "https://github.com/google-ai-edge/gallery/commit/8e4353e838f8d87578cc166a5bb5d2e92843d9f9"
+      }
+    ]
+  },
+  {
+    "sha": "8e4353e838f8d87578cc166a5bb5d2e92843d9f9",
+    "node_id": "C_kwDOORv_S9oAKDhlNDM1M2U4MzhmOGQ4NzU3OGNjMTY2YTViYjVkMmU5Mjg0M2Q5Zjk",
+    "commit": {
+      "author": {
+        "name": "Zichuan Wei",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T16:35:10Z"
+      },
+      "committer": {
+        "name": "Copybara-Service",
+        "email": "redacted@example.invalid",
+        "date": "2026-11-03T16:36:05Z"
+      },
+      "message": "Add text file import support in AI Chat with content extraction and UI preview.\n\nPiperOrigin-RevId: 1013038439",
+      "tree": {
+        "sha": "c92e2d2c253db3f37b23d2605702194257ba404b",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/git/trees/c92e2d2c253db3f37b23d2605702194257ba404b"
+      },
+      "url": "https://api.github.com/repos/google-ai-edge/gallery/git/commits/8e4353e838f8d87578cc166a5bb5d2e92843d9f9",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/8e4353e838f8d87578cc166a5bb5d2e92843d9f9",
+    "html_url": "https://github.com/google-ai-edge/gallery/commit/8e4353e838f8d87578cc166a5bb5d2e92843d9f9",
+    "comments_url": "https://api.github.com/repos/google-ai-edge/gallery/commits/8e4353e838f8d87578cc166a5bb5d2e92843d9f9/comments",
+    "author": {
+      "login": "zichuan-wei",
+      "id": 10928342,
+      "node_id": "MDQ6VXNlcjEwOTI4MzQy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10928342?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/zichuan-wei",
+      "html_url": "https://github.com/zichuan-wei",
+      "followers_url": "https://api.github.com/users/zichuan-wei/followers",
+      "following_url": "https://api.github.com/users/zichuan-wei/following{/other_user}",
+      "gists_url": "https://api.github.com/users/zichuan-wei/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/zichuan-wei/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/zichuan-wei/subscriptions",
+      "organizations_url": "https://api.github.com/users/zichuan-wei/orgs",
+      "repos_url": "https://api.github.com/users/zichuan-wei/repos",
+      "events_url": "https://api.github.com/users/zichuan-wei/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/zichuan-wei/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "copybara-github",
+      "id": 32201506,
+      "node_id": "MDQ6VXNlcjMyMjAxNTA2",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32201506?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/copybara-github",
+      "html_url": "https://github.com/copybara-github",
+      "followers_url": "https://api.github.com/users/copybara-github/followers",
+      "following_url": "https://api.github.com/users/copybara-github/following{/other_user}",
+      "gists_url": "https://api.github.com/users/copybara-github/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/copybara-github/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/copybara-github/subscriptions",
+      "organizations_url": "https://api.github.com/users/copybara-github/orgs",
+      "repos_url": "https://api.github.com/users/copybara-github/repos",
+      "events_url": "https://api.github.com/users/copybara-github/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/copybara-github/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "6d09e2ea0823b0868800ef3b5752852715b58b91",
+        "url": "https://api.github.com/repos/google-ai-edge/gallery/commits/6d09e2ea0823b0868800ef3b5752852715b58b91",
+        "html_url": "https://github.com/google-ai-edge/gallery/commit/6d09e2ea0823b0868800ef3b5752852715b58b91"
+      }
+    ]
+  }
+]

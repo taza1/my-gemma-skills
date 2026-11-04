@@ -1,0 +1,6 @@
+{
+  "type": "JavaScript",
+  "network": "en.wikipedia.org, hn.algolia.com",
+  "secret": "none",
+  "status": "Tested locally"
+}

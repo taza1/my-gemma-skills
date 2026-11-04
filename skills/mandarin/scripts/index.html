@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body>
+<script>
+// ---- inlined from src/shared/skill-runtime.js ----
+// Shared runtime for every skill. Inlined into each skill's index.html by scripts/build.js.
+// Contract (docs/TECHNICAL-RESEARCH.md s4): ai_edge_gallery_get_result(data) returns a JSON
+// string containing ONLY { result } or { error }; unknown fields make the app discard the shape.
+
+class SkillError extends Error {}
+
+function parseInput(data) {
+  if (typeof data !== 'string' || data.trim() === '') {
+    throw new SkillError('No input received. Expected a JSON object.');
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(data);
+  } catch (e) {
+    throw new SkillError('Input is not valid JSON.');
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new SkillError('Input must be a JSON object.');
+  }
+  return parsed;
+}
+
+function requireString(input, field) {
+  const v = input[field];
+  if (v === undefined || v === null) throw new SkillError(`Missing field '${field}'.`);
+  if (typeof v !== 'string' && typeof v !== 'number') {
+    throw new SkillError(`Field '${field}' must be text.`);
+  }
+  const s = String(v).trim();
+  if (s === '') throw new SkillError(`Field '${field}' is empty.`);
+  return s;
+}
+
+function requireNumber(input, field) {
+  const v = input[field];
+  if (v === undefined || v === null) throw new SkillError(`Missing field '${field}'.`);
+  if (typeof v === 'string' && v.trim() === '') throw new SkillError(`Field '${field}' is empty.`);
+  const n = typeof v === 'string' ? Number(v.trim()) : v;
+  if (typeof n !== 'number' || !Number.isFinite(n)) {
+    throw new SkillError(`Field '${field}' must be a finite number.`);
+  }
+  return n;
+}
+
+function registerSkill(handler) {
+  window['ai_edge_gallery_get_result'] = async (data) => {
+    try {
+      const out = await handler(parseInput(data));
+      return JSON.stringify({ result: String(out) });
+    } catch (e) {
+      if (e instanceof SkillError) return JSON.stringify({ error: e.message });
+      console.error(e);
+      return JSON.stringify({ error: 'Unexpected error in skill.' });
+    }
+  };
+}
+
+// ---- inlined from src/shared/text.js ----
+// Text hygiene for UNTRUSTED external text (API fields, headlines, place names).
+// Inlined into skills by scripts/build.js. Output is plain text only, truncated, and
+// wrapped in quotes by quoteData() so the model sees it as data, never as instructions.
+
+function truncate(s, max) {
+  return s.length > max ? s.slice(0, max - 1).trimEnd() + '…' : s;
+}
+
+function cleanText(value, max) {
+  const t = String(value === undefined || value === null ? '' : value)
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/\s*(p|div|h[1-6]|ul|ol)\s*>/gi, '\n')
+    .replace(/<\s*li[^>]*>/gi, '\n- ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    .replace(/[ \t ]+/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
+  return truncate(t, max);
+}
+
+function quoteData(s) {
+  return '“' + String(s).replace(/"/g, "'") + '”';
+}
+
+const MANDARIN = {"updated":"2026-11-04","reviewStatus":"UNREVIEWED: written by an AI assistant from general knowledge of beginner (roughly HSK 1) Standard Mandarin. Not checked by a native speaker or teacher. Automated tests (tests/mandarin-data.test.js) check the FORM of every entry: one pinyin syllable per Chinese character, only legal pinyin syllables, and the written tone changes of 不 and 一. They cannot check that a word, a tone or a translation is right.","pinyinFormat":"Pinyin is stored with tone NUMBERS (1-4, 5 = neutral) and converted to tone marks by the skill. Syllables inside one word are joined (cai4dan1); words are separated by spaces. Written tones follow the official pinyin spelling: the changed tones of 不 and 一 are written as spoken (bu2shi4, yi2ge5, yi4dian3), but the third-tone change (ni3 hao3 is said ni2 hao3) is not written.","topics":{"introductions":{"title":"Introductions and greetings","words":[{"hanzi":"你","py":"ni3","en":"you"},{"hanzi":"您","py":"nin2","en":"you (polite)"},{"hanzi":"我","py":"wo3","en":"I, me"},{"hanzi":"好","py":"hao3","en":"good, well"},{"hanzi":"叫","py":"jiao4","en":"to be called"},{"hanzi":"名字","py":"ming2zi5","en":"name"},{"hanzi":"是","py":"shi4","en":"to be"},{"hanzi":"学生","py":"xue2sheng5","en":"student"},{"hanzi":"老师","py":"lao3shi1","en":"teacher"},{"hanzi":"朋友","py":"peng2you5","en":"friend"},{"hanzi":"爱尔兰","py":"Ai4er3lan2","en":"Ireland"},{"hanzi":"人","py":"ren2","en":"person (after a country: a person from there)"},{"hanzi":"什么","py":"shen2me5","en":"what"}],"phrases":[{"hanzi":"你好！","py":"ni3 hao3!","en":"Hello!"},{"hanzi":"您好！","py":"nin2 hao3!","en":"Hello! (polite)"},{"hanzi":"早上好！","py":"zao3shang5 hao3!","en":"Good morning!"},{"hanzi":"你叫什么名字？","py":"ni3 jiao4 shen2me5 ming2zi5?","en":"What is your name?"},{"hanzi":"我叫大卫。","py":"wo3 jiao4 Da4wei4.","en":"My name is David."},{"hanzi":"很高兴认识你。","py":"hen3 gao1xing4 ren4shi5 ni3.","en":"Nice to meet you."},{"hanzi":"我是爱尔兰人。","py":"wo3 shi4 Ai4er3lan2 ren2.","en":"I am Irish."},{"hanzi":"你是学生吗？","py":"ni3 shi4 xue2sheng5 ma5?","en":"Are you a student?"},{"hanzi":"谢谢！","py":"xie4xie5!","en":"Thank you!"},{"hanzi":"不客气。","py":"bu2 ke4qi5.","en":"You are welcome."},{"hanzi":"再见！","py":"zai4jian4!","en":"Goodbye!"}],"dialogue":[{"who":"A","hanzi":"你好！我叫大卫。","py":"ni3 hao3! wo3 jiao4 Da4wei4.","en":"Hello! My name is David."},{"who":"B","hanzi":"你好！我叫李明。很高兴认识你。","py":"ni3 hao3! wo3 jiao4 Li3 Ming2. hen3 gao1xing4 ren4shi5 ni3.","en":"Hello! My name is Li Ming. Nice to meet you."},{"who":"A","hanzi":"你是学生吗？","py":"ni3 shi4 xue2sheng5 ma5?","en":"Are you a student?"},{"who":"B","hanzi":"是，我是学生。你呢？","py":"shi4, wo3 shi4 xue2sheng5. ni3 ne5?","en":"Yes, I am a student. And you?"},{"who":"A","hanzi":"我是老师。我是爱尔兰人。","py":"wo3 shi4 lao3shi1. wo3 shi4 Ai4er3lan2 ren2.","en":"I am a teacher. I am Irish."},{"who":"B","hanzi":"再见！","py":"zai4jian4!","en":"Goodbye!"}],"tip":"Chinese has no spaces between characters, no plurals and no verb endings. Put 吗 at the end of a statement to turn it into a yes/no question."},"numbers":{"title":"Numbers and prices","words":[{"hanzi":"零","py":"ling2","en":"zero"},{"hanzi":"一","py":"yi1","en":"one"},{"hanzi":"二","py":"er4","en":"two"},{"hanzi":"三","py":"san1","en":"three"},{"hanzi":"四","py":"si4","en":"four"},{"hanzi":"五","py":"wu3","en":"five"},{"hanzi":"六","py":"liu4","en":"six"},{"hanzi":"七","py":"qi1","en":"seven"},{"hanzi":"八","py":"ba1","en":"eight"},{"hanzi":"九","py":"jiu3","en":"nine"},{"hanzi":"十","py":"shi2","en":"ten"},{"hanzi":"百","py":"bai3","en":"hundred"},{"hanzi":"块","py":"kuai4","en":"yuan (spoken word for the currency unit)"},{"hanzi":"钱","py":"qian2","en":"money"},{"hanzi":"多少","py":"duo1shao5","en":"how many, how much"},{"hanzi":"对","py":"dui4","en":"correct, right"}],"phrases":[{"hanzi":"一二三四五","py":"yi1 er4 san1 si4 wu3","en":"one two three four five"},{"hanzi":"六七八九十","py":"liu4 qi1 ba1 jiu3 shi2","en":"six seven eight nine ten"},{"hanzi":"十一","py":"shi2yi1","en":"eleven"},{"hanzi":"二十","py":"er4shi2","en":"twenty"},{"hanzi":"二十五","py":"er4shi2wu3","en":"twenty-five"},{"hanzi":"一百","py":"yi4bai3","en":"one hundred"},{"hanzi":"多少钱？","py":"duo1shao5 qian2?","en":"How much is it?"},{"hanzi":"五块","py":"wu3 kuai4","en":"five yuan"},{"hanzi":"十五块","py":"shi2wu3 kuai4","en":"fifteen yuan"},{"hanzi":"八零八","py":"ba1 ling2 ba1","en":"eight-oh-eight (808, a room number)"}],"dialogue":[{"who":"A","hanzi":"多少钱？","py":"duo1shao5 qian2?","en":"How much is it?"},{"who":"B","hanzi":"十五块。","py":"shi2wu3 kuai4.","en":"Fifteen yuan."},{"who":"A","hanzi":"十五块？","py":"shi2wu3 kuai4?","en":"Fifteen yuan?"},{"who":"B","hanzi":"对，十五块。","py":"dui4, shi2wu3 kuai4.","en":"Yes, fifteen yuan."},{"who":"A","hanzi":"谢谢！","py":"xie4xie5!","en":"Thank you!"},{"who":"B","hanzi":"不客气。","py":"bu2 ke4qi5.","en":"You are welcome."}],"tip":"Numbers from 11 to 99 are built from tens and ones: 十一 is ten-one, 二十 is two-ten, 二十五 is two-ten-five. 块 (kuài) is the everyday word for yuan."},"shopping":{"title":"Shopping","words":[{"hanzi":"买","py":"mai3","en":"to buy"},{"hanzi":"要","py":"yao4","en":"to want, to take"},{"hanzi":"想","py":"xiang3","en":"to want to, would like to"},{"hanzi":"这个","py":"zhe4ge5","en":"this one"},{"hanzi":"那个","py":"na4ge5","en":"that one"},{"hanzi":"贵","py":"gui4","en":"expensive"},{"hanzi":"便宜","py":"pian2yi5","en":"cheap"},{"hanzi":"太","py":"tai4","en":"too, extremely"},{"hanzi":"商店","py":"shang1dian4","en":"shop"},{"hanzi":"水果","py":"shui3guo3","en":"fruit"},{"hanzi":"苹果","py":"ping2guo3","en":"apple"},{"hanzi":"斤","py":"jin1","en":"jin (a unit of weight, 500 g)"},{"hanzi":"两","py":"liang3","en":"two (before a measure word)"},{"hanzi":"可以","py":"ke3yi3","en":"can, may"},{"hanzi":"一点","py":"yi4dian3","en":"a little, a bit"},{"hanzi":"刷卡","py":"shua1ka3","en":"to pay by card"}],"phrases":[{"hanzi":"这个多少钱？","py":"zhe4ge5 duo1shao5 qian2?","en":"How much is this?"},{"hanzi":"太贵了！","py":"tai4 gui4 le5!","en":"Too expensive!"},{"hanzi":"可以便宜一点吗？","py":"ke3yi3 pian2yi5 yi4dian3 ma5?","en":"Can it be a bit cheaper?"},{"hanzi":"我要这个。","py":"wo3 yao4 zhe4ge5.","en":"I will take this one."},{"hanzi":"我想买苹果。","py":"wo3 xiang3 mai3 ping2guo3.","en":"I would like to buy apples."},{"hanzi":"五块一斤。","py":"wu3 kuai4 yi4 jin1.","en":"Five yuan per jin."},{"hanzi":"我要两斤。","py":"wo3 yao4 liang3 jin1.","en":"I will take two jin."},{"hanzi":"可以刷卡吗？","py":"ke3yi3 shua1ka3 ma5?","en":"Can I pay by card?"},{"hanzi":"我只是看看。","py":"wo3 zhi3shi4 kan4kan5.","en":"I am just looking."}],"dialogue":[{"who":"B","hanzi":"你好，你要什么？","py":"ni3 hao3, ni3 yao4 shen2me5?","en":"Hello, what would you like?"},{"who":"A","hanzi":"我想买苹果。多少钱？","py":"wo3 xiang3 mai3 ping2guo3. duo1shao5 qian2?","en":"I would like to buy apples. How much?"},{"who":"B","hanzi":"五块一斤。","py":"wu3 kuai4 yi4 jin1.","en":"Five yuan per jin."},{"who":"A","hanzi":"太贵了！可以便宜一点吗？","py":"tai4 gui4 le5! ke3yi3 pian2yi5 yi4dian3 ma5?","en":"Too expensive! Can it be a bit cheaper?"},{"who":"B","hanzi":"好，四块五。","py":"hao3, si4 kuai4 wu3.","en":"OK, four fifty."},{"who":"A","hanzi":"好，我要两斤。谢谢！","py":"hao3, wo3 yao4 liang3 jin1. xie4xie5!","en":"OK, I will take two jin. Thank you!"}],"tip":"In speech the last unit of a price is often dropped: 四块五 means 4.50 yuan. A polite way to bargain is 可以便宜一点吗？"},"restaurant":{"title":"Restaurant","words":[{"hanzi":"菜单","py":"cai4dan1","en":"menu"},{"hanzi":"服务员","py":"fu2wu4yuan2","en":"waiter, server"},{"hanzi":"吃","py":"chi1","en":"to eat"},{"hanzi":"喝","py":"he1","en":"to drink"},{"hanzi":"水","py":"shui3","en":"water"},{"hanzi":"茶","py":"cha2","en":"tea"},{"hanzi":"杯","py":"bei1","en":"cup, glass (measure word)"},{"hanzi":"米饭","py":"mi3fan4","en":"cooked rice"},{"hanzi":"面条","py":"mian4tiao2","en":"noodles"},{"hanzi":"鸡肉","py":"ji1rou4","en":"chicken (meat)"},{"hanzi":"牛肉","py":"niu2rou4","en":"beef"},{"hanzi":"辣","py":"la4","en":"spicy"},{"hanzi":"好吃","py":"hao3chi1","en":"delicious"},{"hanzi":"买单","py":"mai3dan1","en":"to pay the bill"},{"hanzi":"和","py":"he2","en":"and"},{"hanzi":"请","py":"qing3","en":"please"},{"hanzi":"给","py":"gei3","en":"to give"}],"phrases":[{"hanzi":"请给我菜单。","py":"qing3 gei3 wo3 cai4dan1.","en":"Please give me the menu."},{"hanzi":"我要一杯茶。","py":"wo3 yao4 yi4bei1 cha2.","en":"I would like a cup of tea."},{"hanzi":"有米饭吗？","py":"you3 mi3fan4 ma5?","en":"Do you have rice?"},{"hanzi":"我要米饭和鸡肉。","py":"wo3 yao4 mi3fan4 he2 ji1rou4.","en":"I would like rice and chicken."},{"hanzi":"不要辣的。","py":"bu2yao4 la4 de5.","en":"Not spicy, please."},{"hanzi":"我不吃牛肉。","py":"wo3 bu4 chi1 niu2rou4.","en":"I do not eat beef."},{"hanzi":"很好吃！","py":"hen3 hao3chi1!","en":"Delicious!"},{"hanzi":"买单，谢谢。","py":"mai3dan1, xie4xie5.","en":"The bill, please."}],"dialogue":[{"who":"A","hanzi":"服务员，请给我菜单。","py":"fu2wu4yuan2, qing3 gei3 wo3 cai4dan1.","en":"Waiter, please give me the menu."},{"who":"B","hanzi":"好的。你要什么？","py":"hao3 de5. ni3 yao4 shen2me5?","en":"OK. What would you like?"},{"who":"A","hanzi":"我要米饭和鸡肉。不要辣的。","py":"wo3 yao4 mi3fan4 he2 ji1rou4. bu2yao4 la4 de5.","en":"I would like rice and chicken. Not spicy."},{"who":"B","hanzi":"喝什么？","py":"he1 shen2me5?","en":"What to drink?"},{"who":"A","hanzi":"一杯茶，谢谢。","py":"yi4bei1 cha2, xie4xie5.","en":"A cup of tea, thank you."},{"who":"A (later)","hanzi":"很好吃！买单，谢谢。","py":"hen3 hao3chi1! mai3dan1, xie4xie5.","en":"Delicious! The bill, please."}],"tip":"Call a waiter with 服务员 and ask for the bill with 买单. 不要 means 'do not want', so 不要辣的 asks for no spicy food."},"hotel":{"title":"Hotel","words":[{"hanzi":"酒店","py":"jiu3dian4","en":"hotel"},{"hanzi":"房间","py":"fang2jian1","en":"room"},{"hanzi":"预订","py":"yu4ding4","en":"reservation, to book"},{"hanzi":"订","py":"ding4","en":"to book"},{"hanzi":"护照","py":"hu4zhao4","en":"passport"},{"hanzi":"住","py":"zhu4","en":"to stay, to live"},{"hanzi":"晚","py":"wan3","en":"night, evening"},{"hanzi":"早餐","py":"zao3can1","en":"breakfast"},{"hanzi":"点","py":"dian3","en":"o'clock"},{"hanzi":"几","py":"ji3","en":"how many, what (number)"},{"hanzi":"到","py":"dao4","en":"to, until"},{"hanzi":"入住","py":"ru4zhu4","en":"to check in"},{"hanzi":"退房","py":"tui4fang2","en":"to check out"},{"hanzi":"洗手间","py":"xi3shou3jian1","en":"restroom"},{"hanzi":"哪里","py":"na3li5","en":"where"},{"hanzi":"在","py":"zai4","en":"to be at, in"}],"phrases":[{"hanzi":"我有预订。","py":"wo3 you3 yu4ding4.","en":"I have a reservation."},{"hanzi":"我想订一个房间。","py":"wo3 xiang3 ding4 yi2ge5 fang2jian1.","en":"I would like to book a room."},{"hanzi":"住两晚。","py":"zhu4 liang3 wan3.","en":"Staying two nights."},{"hanzi":"房间多少钱一晚？","py":"fang2jian1 duo1shao5 qian2 yi4 wan3?","en":"How much is the room per night?"},{"hanzi":"这是我的护照。","py":"zhe4 shi4 wo3 de5 hu4zhao4.","en":"This is my passport."},{"hanzi":"早餐几点？","py":"zao3can1 ji3 dian3?","en":"What time is breakfast?"},{"hanzi":"我想退房。","py":"wo3 xiang3 tui4fang2.","en":"I would like to check out."},{"hanzi":"洗手间在哪里？","py":"xi3shou3jian1 zai4 na3li5?","en":"Where is the restroom?"}],"dialogue":[{"who":"A","hanzi":"你好，我有预订。","py":"ni3 hao3, wo3 you3 yu4ding4.","en":"Hello, I have a reservation."},{"who":"B","hanzi":"您好。请给我您的护照。","py":"nin2 hao3. qing3 gei3 wo3 nin2 de5 hu4zhao4.","en":"Hello. Please give me your passport."},{"who":"A","hanzi":"好的。这是我的护照。","py":"hao3 de5. zhe4 shi4 wo3 de5 hu4zhao4.","en":"OK. This is my passport."},{"who":"B","hanzi":"谢谢。您的房间是八零八。","py":"xie4xie5. nin2 de5 fang2jian1 shi4 ba1 ling2 ba1.","en":"Thank you. Your room is 808."},{"who":"A","hanzi":"早餐几点？","py":"zao3can1 ji3 dian3?","en":"What time is breakfast?"},{"who":"B","hanzi":"早上七点到十点。","py":"zao3shang5 qi1 dian3 dao4 shi2 dian3.","en":"From seven to ten in the morning."}],"tip":"Clock times use 点 (diǎn, o'clock): 七点 is seven o'clock. 到 (dào) means 'until', so 七点到十点 is 'from seven to ten'. Room numbers are read digit by digit, with 零 for 0."},"directions":{"title":"Directions","words":[{"hanzi":"请问","py":"qing3wen4","en":"excuse me (may I ask)"},{"hanzi":"左","py":"zuo3","en":"left"},{"hanzi":"右","py":"you4","en":"right"},{"hanzi":"前面","py":"qian2mian5","en":"ahead, in front"},{"hanzi":"一直","py":"yi4zhi2","en":"straight on"},{"hanzi":"走","py":"zou3","en":"to walk, to go"},{"hanzi":"转","py":"zhuan3","en":"to turn"},{"hanzi":"向","py":"xiang4","en":"towards"},{"hanzi":"远","py":"yuan3","en":"far"},{"hanzi":"近","py":"jin4","en":"near"},{"hanzi":"离","py":"li2","en":"away from, from"},{"hanzi":"然后","py":"ran2hou4","en":"then, afterwards"},{"hanzi":"就","py":"jiu4","en":"just, right (emphasis)"},{"hanzi":"地铁站","py":"di4tie3zhan4","en":"subway station"},{"hanzi":"火车站","py":"huo3che1zhan4","en":"train station"},{"hanzi":"机场","py":"ji1chang3","en":"airport"},{"hanzi":"银行","py":"yin2hang2","en":"bank"},{"hanzi":"分钟","py":"fen1zhong1","en":"minute(s)"}],"phrases":[{"hanzi":"请问，银行在哪里？","py":"qing3wen4, yin2hang2 zai4 na3li5?","en":"Excuse me, where is the bank?"},{"hanzi":"离这里远吗？","py":"li2 zhe4li5 yuan3 ma5?","en":"Is it far from here?"},{"hanzi":"一直走。","py":"yi4zhi2 zou3.","en":"Go straight on."},{"hanzi":"向左转。","py":"xiang4 zuo3 zhuan3.","en":"Turn left."},{"hanzi":"向右转。","py":"xiang4 you4 zhuan3.","en":"Turn right."},{"hanzi":"就在前面。","py":"jiu4 zai4 qian2mian5.","en":"It is just ahead."},{"hanzi":"走路五分钟。","py":"zou3lu4 wu3 fen1zhong1.","en":"Five minutes on foot."},{"hanzi":"地铁站远吗？","py":"di4tie3zhan4 yuan3 ma5?","en":"Is the subway station far?"}],"dialogue":[{"who":"A","hanzi":"请问，银行在哪里？","py":"qing3wen4, yin2hang2 zai4 na3li5?","en":"Excuse me, where is the bank?"},{"who":"B","hanzi":"一直走，然后向左转。","py":"yi4zhi2 zou3, ran2hou4 xiang4 zuo3 zhuan3.","en":"Go straight on, then turn left."},{"who":"A","hanzi":"远吗？","py":"yuan3 ma5?","en":"Is it far?"},{"who":"B","hanzi":"不远，走路五分钟。","py":"bu4 yuan3, zou3lu4 wu3 fen1zhong1.","en":"Not far, five minutes on foot."},{"who":"A","hanzi":"谢谢！","py":"xie4xie5!","en":"Thank you!"},{"who":"B","hanzi":"不客气。","py":"bu2 ke4qi5.","en":"You are welcome."}],"tip":"Directions come in the order you walk them: 一直走 (straight on), 然后 (then), 向左转 (turn left). Add 吗 to ask a yes/no question such as 远吗？"},"everyday":{"title":"Everyday conversation","words":[{"hanzi":"家","py":"jia1","en":"home, family"},{"hanzi":"今天","py":"jin1tian1","en":"today"},{"hanzi":"明天","py":"ming2tian1","en":"tomorrow"},{"hanzi":"现在","py":"xian4zai4","en":"now"},{"hanzi":"喜欢","py":"xi3huan5","en":"to like"},{"hanzi":"工作","py":"gong1zuo4","en":"work, to work"},{"hanzi":"说","py":"shuo1","en":"to speak, to say"},{"hanzi":"中文","py":"Zhong1wen2","en":"Chinese (language)"},{"hanzi":"英语","py":"Ying1yu3","en":"English (language)"},{"hanzi":"会","py":"hui4","en":"can, to know how to"},{"hanzi":"也","py":"ye3","en":"also"},{"hanzi":"很","py":"hen3","en":"very"},{"hanzi":"知道","py":"zhi1dao5","en":"to know (a fact)"},{"hanzi":"对不起","py":"dui4bu5qi3","en":"sorry"},{"hanzi":"天气","py":"tian1qi4","en":"weather"},{"hanzi":"累","py":"lei4","en":"tired"},{"hanzi":"再","py":"zai4","en":"again"}],"phrases":[{"hanzi":"你好吗？","py":"ni3 hao3 ma5?","en":"How are you?"},{"hanzi":"我很好，你呢？","py":"wo3 hen3 hao3, ni3 ne5?","en":"I am fine, and you?"},{"hanzi":"我也很好。","py":"wo3 ye3 hen3 hao3.","en":"I am also fine."},{"hanzi":"我喜欢中文。","py":"wo3 xi3huan5 Zhong1wen2.","en":"I like Chinese."},{"hanzi":"你会说英语吗？","py":"ni3 hui4 shuo1 Ying1yu3 ma5?","en":"Can you speak English?"},{"hanzi":"我会说一点中文。","py":"wo3 hui4 shuo1 yi4dian3 Zhong1wen2.","en":"I can speak a little Chinese."},{"hanzi":"对不起，我不知道。","py":"dui4bu5qi3, wo3 bu4 zhi1dao5.","en":"Sorry, I do not know."},{"hanzi":"请再说一次。","py":"qing3 zai4 shuo1 yi2ci4.","en":"Please say it once more."},{"hanzi":"今天天气很好。","py":"jin1tian1 tian1qi4 hen3 hao3.","en":"The weather is nice today."},{"hanzi":"明天见！","py":"ming2tian1 jian4!","en":"See you tomorrow!"}],"dialogue":[{"who":"A","hanzi":"你好吗？","py":"ni3 hao3 ma5?","en":"How are you?"},{"who":"B","hanzi":"我很好，你呢？","py":"wo3 hen3 hao3, ni3 ne5?","en":"I am fine, and you?"},{"who":"A","hanzi":"我也很好。你会说英语吗？","py":"wo3 ye3 hen3 hao3. ni3 hui4 shuo1 Ying1yu3 ma5?","en":"I am also fine. Can you speak English?"},{"who":"B","hanzi":"我会说一点英语。你会说中文吗？","py":"wo3 hui4 shuo1 yi4dian3 Ying1yu3. ni3 hui4 shuo1 Zhong1wen2 ma5?","en":"I can speak a little English. Can you speak Chinese?"},{"who":"A","hanzi":"我会说一点中文。","py":"wo3 hui4 shuo1 yi4dian3 Zhong1wen2.","en":"I can speak a little Chinese."},{"who":"B","hanzi":"太好了！明天见！","py":"tai4 hao3 le5! ming2tian1 jian4!","en":"Great! See you tomorrow!"}],"tip":"Chinese verbs do not change form for person or tense: the same verb is used for 'I go' and 'he goes'. Time words such as 今天 (today) and 明天 (tomorrow) show when something happens."}},"tones":{"marks":[{"tone":1,"name":"first tone","shape":"high and level","hanzi":"妈","py":"ma1","en":"mother"},{"tone":2,"name":"second tone","shape":"rising, like a surprised 'what?'","hanzi":"麻","py":"ma2","en":"hemp"},{"tone":3,"name":"third tone","shape":"dips low, then rises a little","hanzi":"马","py":"ma3","en":"horse"},{"tone":4,"name":"fourth tone","shape":"short and falling, like a firm 'No!'","hanzi":"骂","py":"ma4","en":"to scold"},{"tone":5,"name":"neutral tone","shape":"light and short, no mark","hanzi":"吗","py":"ma5","en":"question particle"}],"changes":["Two third tones in a row: the first is said as a second tone. 你好 is written nǐ hǎo but said ní hǎo. Pinyin does not show this change.","不 (bù) becomes bú before a fourth tone: 不是 is written and said bú shì. Pinyin does show this change.","一 (yī) is yī when counting or on its own, yí before a fourth tone (一个 yí ge) and yì before a first, second or third tone (一天 yì tiān, 一点 yì diǎn). Pinyin shows this change."],"pairs":[{"a":{"hanzi":"买","py":"mai3","en":"buy"},"b":{"hanzi":"卖","py":"mai4","en":"sell"}},{"a":{"hanzi":"水","py":"shui3","en":"water"},"b":{"hanzi":"睡","py":"shui4","en":"sleep"}},{"a":{"hanzi":"是","py":"shi4","en":"to be"},"b":{"hanzi":"十","py":"shi2","en":"ten"}}],"sounds":["b, d, g and p, t, k: both sets are 'plain' to English ears. The second set (p, t, k) comes with a clear puff of air, the first set (b, d, g) has none. The same puff pairs: z / c, zh / ch, j / q.","j, q, x: say them with your lips spread and the tip of your tongue behind your lower teeth. q is like a soft 'ch', x is like a soft 'sh', j is like a soft 'j'.","zh, ch, sh, r: curl the tip of your tongue back. r is closer to the 's' in 'treasure' than to an English r. It is not rolled.","z is like 'ds' in 'kids'; c is like 'ts' in 'cats' with a strong puff of air.","ü (as in 女 nǚ): say 'ee' while rounding your lips as for 'oo'. After j, q, x and y it is written plain u (xu, yu).","e on its own is like a relaxed 'uh' at the back of the mouth; -ian sounds like 'yen'; -ui like 'way'; -iu like 'yo'; ao like 'ow'."]},"mistakes":[{"title":"Yes/no questions: add 吗","explain":"Do not change the word order. Put 吗 (ma) at the end of the statement.","examples":[{"hanzi":"你是学生吗？","py":"ni3 shi4 xue2sheng5 ma5?","en":"Are you a student?"}]},{"title":"不 versus 没","explain":"不 negates 'to be', habits and the future. 没(有) negates 'to have' and things that did not happen.","examples":[{"hanzi":"我不是学生。","py":"wo3 bu2 shi4 xue2sheng5.","en":"I am not a student."},{"hanzi":"我没有钱。","py":"wo3 mei2you3 qian2.","en":"I have no money."}]},{"title":"二 versus 两","explain":"Say 两 for 'two of something' before a measure word. Use 二 inside numbers.","examples":[{"hanzi":"两个人","py":"liang3ge5 ren2","en":"two people"},{"hanzi":"二十","py":"er4shi2","en":"twenty"}]},{"title":"Do not forget the measure word","explain":"Between a number and a noun you usually need a measure word such as 个 (ge) or 杯 (bei).","examples":[{"hanzi":"三个朋友","py":"san1ge5 peng2you5","en":"three friends"},{"hanzi":"一杯茶","py":"yi4bei1 cha2","en":"a cup of tea"}]},{"title":"Verbs and nouns do not change form","explain":"There are no verb endings and no plural -s. Time words tell you when.","examples":[{"hanzi":"我去。","py":"wo3 qu4.","en":"I go."},{"hanzi":"他去。","py":"ta1 qu4.","en":"He goes."}]},{"title":"Time and place come before the verb","explain":"Say when and where first, then the action.","examples":[{"hanzi":"我明天去北京。","py":"wo3 ming2tian1 qu4 Bei3jing1.","en":"I am going to Beijing tomorrow."}]},{"title":"Tones change the word","explain":"A wrong tone can give a different word, so learn the tone together with each word.","examples":[{"hanzi":"买","py":"mai3","en":"to buy"},{"hanzi":"卖","py":"mai4","en":"to sell"}]},{"title":"Pinyin letters are not English letters","explain":"q is not 'k' and x is not 'ks'. q is a soft 'ch' and x is a soft 'sh'. c is 'ts'.","examples":[{"hanzi":"七","py":"qi1","en":"seven"},{"hanzi":"谢谢","py":"xie4xie5","en":"thank you"}]},{"title":"Written tones and spoken tones can differ","explain":"你好 is written nǐ hǎo but said ní hǎo. The changed tones of 不 and 一 are written as they are said.","examples":[{"hanzi":"你好","py":"ni3 hao3","en":"hello"},{"hanzi":"不是","py":"bu2 shi4","en":"is not"},{"hanzi":"一个","py":"yi2ge5","en":"one (of something)"}]}]};
+
+// Offline Mandarin lessons for a beginner. All Chinese content comes from data/mandarin.json
+// (embedded at build time), never from the model's memory. Pinyin is stored with tone numbers and
+// turned into tone marks here, so a tone mark cannot be mistyped in the data. No audio.
+const TONE_MARKS = { a: 'āáǎà', e: 'ēéěè', i: 'īíǐì', o: 'ōóǒò', u: 'ūúǔù', 'ü': 'ǖǘǚǜ' };
+const TONE_NAMES = ['first tone (high, level)', 'second tone (rising)', 'third tone (dipping)', 'fourth tone (falling)'];
+const HAN = /[一-鿿]/;
+const TOPIC_IDS = Object.keys(MANDARIN.topics);
+const FOOTER = 'Beginner content, not yet reviewed by a native speaker. This skill cannot play audio: for the sounds, listen to a native speaker or a dictionary app.';
+
+const MODES = ['lesson', 'quiz', 'tones', 'mistakes', 'lookup'];
+const MODE_ALIASES = {
+  learn: 'lesson', teach: 'lesson', vocabulary: 'lesson', vocab: 'lesson', words: 'lesson', phrases: 'lesson',
+  practice: 'quiz', test: 'quiz', exercise: 'quiz', exercises: 'quiz', questions: 'quiz',
+  pronunciation: 'tones', tone: 'tones', mistake: 'mistakes', errors: 'mistakes',
+  search: 'lookup', translate: 'lookup', find: 'lookup', word: 'lookup', dictionary: 'lookup',
+};
+const TOPIC_ALIASES = {
+  greetings: 'introductions', greeting: 'introductions', introduction: 'introductions', intro: 'introductions', hello: 'introductions',
+  number: 'numbers', counting: 'numbers', prices: 'numbers', price: 'numbers',
+  shop: 'shopping', store: 'shopping', buying: 'shopping',
+  food: 'restaurant', eating: 'restaurant', dining: 'restaurant', restaurants: 'restaurant',
+  hotels: 'hotel', accommodation: 'hotel',
+  direction: 'directions', travel: 'directions', transport: 'directions', navigation: 'directions',
+  daily: 'everyday', conversation: 'everyday', chat: 'everyday', general: 'everyday',
+};
+
+// ---- Pinyin: tone numbers -> tone marks ----------------------------------------------------------
+
+// "shui3" -> "shuǐ". Mark goes on a, else e, else the o of "ou", else the last vowel.
+function markSyllable(body, tone) {
+  const s = body.replace(/v/g, 'ü').replace(/V/g, 'Ü');
+  if (tone === 5) return s;
+  const lc = s.toLowerCase();
+  let idx = lc.indexOf('a');
+  if (idx < 0) idx = lc.indexOf('e');
+  if (idx < 0 && lc.indexOf('ou') >= 0) idx = lc.indexOf('o');
+  if (idx < 0) {
+    for (let i = lc.length - 1; i >= 0; i--) {
+      if ('aeiouü'.indexOf(lc[i]) >= 0) { idx = i; break; }
+    }
+  }
+  if (idx < 0) return s;
+  const marked = TONE_MARKS[lc[idx]][tone - 1];
+  return s.slice(0, idx) + (s[idx] === lc[idx] ? marked : marked.toUpperCase()) + s.slice(idx + 1);
+}
+
+// "cai4dan1" -> "càidān", "xi1an1" -> "xī'ān". Punctuation and spaces pass through unchanged.
+// With capitalize, the first letter of each sentence is upper-cased.
+function toMarks(py, capitalize) {
+  const out = String(py).replace(/([A-Za-z]+)([1-5])/g, (m, body, tone, offset, whole) => {
+    const prev = offset > 0 ? whole[offset - 1] : '';
+    const apostrophe = /[1-5]/.test(prev) && /^[aoeAOE]/.test(body) ? "'" : '';
+    return apostrophe + markSyllable(body, Number(tone));
+  });
+  return capitalize ? out.replace(/(^|[.!?]\s+)(\S)/g, (m, lead, c) => lead + c.toUpperCase()) : out;
+}
+
+function syllables(py) {
+  return String(py).match(/[A-Za-z]+[1-5]/g) || [];
+}
+
+// ---- Small deterministic random helpers (seeded, so tests can fix the clock) ---------------------
+
+function rng(seed) {
+  let s = (seed >>> 0) || 1;
+  const next = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+  for (let i = 0; i < 4; i++) next();
+  return next;
+}
+
+function shuffle(arr, rand) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+// ---- Input ------------------------------------------------------------------------------------------
+
+function pick(raw, list, aliases, field) {
+  const t = cleanText(raw, 40).toLowerCase();
+  const id = list.includes(t) ? t : aliases[t];
+  if (!id) throw new SkillError(`Unknown ${field} '${cleanText(raw, 30)}'. Use one of: ${list.join(', ')}.`);
+  return id;
+}
+
+function isGiven(v) { return v !== undefined && v !== null && String(v).trim() !== ''; }
+
+// ---- Formatting ---------------------------------------------------------------------------------------
+
+const fmtWord = (w) => `- ${w.hanzi} ${toMarks(w.py)} — ${w.en}`;
+const fmtPhrase = (p) => `- ${p.hanzi} ${toMarks(p.py, true)} — ${p.en}`;
+
+function lessonText(id) {
+  const t = MANDARIN.topics[id];
+  const lines = [`Mandarin for beginners: ${t.title}`, 'Words:'];
+  t.words.forEach((w) => lines.push(fmtWord(w)));
+  lines.push('Phrases:');
+  t.phrases.forEach((p) => lines.push(fmtPhrase(p)));
+  lines.push('Dialogue:');
+  t.dialogue.forEach((d) => {
+    lines.push(`${d.who}: ${d.hanzi}`);
+    lines.push(`   ${toMarks(d.py, true)} — ${d.en}`);
+  });
+  lines.push(`Tip: ${t.tip}`);
+  lines.push('Ask for "tones" for help with the tone marks, "quiz" to practise, or "mistakes" for common beginner errors.');
+  lines.push(FOOTER);
+  return lines.join('\n');
+}
+
+function quizText(topicId, nowMs) {
+  const rand = rng(nowMs);
+  const ids = topicId ? [topicId] : TOPIC_IDS;
+  const words = [];
+  const phrases = [];
+  ids.forEach((id) => {
+    MANDARIN.topics[id].words.forEach((w) => words.push(w));
+    MANDARIN.topics[id].phrases.forEach((p) => phrases.push(p));
+  });
+  const w = shuffle(words, rand);
+  const p = shuffle(phrases, rand);
+
+  // Tone question: show one syllable with its mark and ask which tone it carries.
+  let toneQ = null;
+  for (let i = 2; i < w.length && !toneQ; i++) {
+    const sylls = syllables(w[i].py).map((s, n) => ({ s, n })).filter((x) => !/5$/.test(x.s));
+    if (sylls.length === 0) continue;
+    const choice = sylls[Math.floor(rand() * sylls.length)];
+    const body = choice.s.slice(0, -1);
+    const tone = Number(choice.s.slice(-1));
+    const ch = Array.from(w[i].hanzi)[choice.n];
+    toneQ = {
+      q: `Which tone is the syllable “${markSyllable(body, tone)}” (the character ${ch})?`,
+      a: TONE_NAMES[tone - 1],
+    };
+  }
+
+  const qs = [
+    { q: `What does ${w[0].hanzi} (${toMarks(w[0].py)}) mean?`, a: w[0].en },
+    { q: `How do you say “${w[1].en}” in Chinese? (characters or pinyin)`, a: `${w[1].hanzi} ${toMarks(w[1].py)}` },
+    toneQ,
+    { q: `What does this mean in English? ${p[0].hanzi}`, a: `${p[0].en} (${toMarks(p[0].py, true)})` },
+    { q: `What does this mean in English? ${p[1].hanzi}`, a: `${p[1].en} (${toMarks(p[1].py, true)})` },
+  ];
+  const title = topicId ? MANDARIN.topics[topicId].title : 'all topics';
+  const lines = [
+    `Mandarin quiz: ${title} (5 questions)`,
+    'For the tutor: ask one question at a time, wait for the learner to answer, then check it against the answers below. Do not show the answers first.',
+  ];
+  qs.forEach((x, i) => lines.push(`${i + 1}. ${x.q}`));
+  lines.push('Answers (for checking only):');
+  qs.forEach((x, i) => lines.push(`${i + 1}. ${x.a}`));
+  lines.push(FOOTER);
+  return lines.join('\n');
+}
+
+function tonesText() {
+  const T = MANDARIN.tones;
+  const lines = ['Mandarin tones: the four tones and the neutral tone, on the syllable ma:'];
+  T.marks.forEach((m) => lines.push(`- ${toMarks(m.py)} ${m.hanzi} (${m.en}): ${m.name}, ${m.shape}`));
+  lines.push('Tone changes in speech:');
+  T.changes.forEach((c) => lines.push(`- ${c}`));
+  lines.push('Practise these pairs (they differ only in tone):');
+  T.pairs.forEach((x) => lines.push(`- ${x.a.hanzi} ${toMarks(x.a.py)} (${x.a.en}) / ${x.b.hanzi} ${toMarks(x.b.py)} (${x.b.en})`));
+  lines.push('Sounds that trip up English speakers (approximate comparisons only):');
+  T.sounds.forEach((s) => lines.push(`- ${s}`));
+  lines.push(FOOTER);
+  return lines.join('\n');
+}
+
+function mistakesText() {
+  const lines = ['Common beginner mistakes in Mandarin:'];
+  MANDARIN.mistakes.forEach((m, i) => {
+    lines.push(`${i + 1}. ${m.title}: ${m.explain}`);
+    m.examples.forEach((e) => lines.push(`   ${e.hanzi} ${toMarks(e.py, true)} — ${e.en}`));
+  });
+  lines.push(FOOTER);
+  return lines.join('\n');
+}
+
+// ---- Lookup -------------------------------------------------------------------------------------------
+
+// Letters only, lower case, tone marks and numbers removed, ü -> v: "Cài dān", "cai4dan1", "caidan" all match.
+function plain(s) {
+  return String(s).normalize('NFD').replace(/ü/gi, 'v').replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-Za-z]/g, '').toLowerCase();
+}
+
+function allEntries() {
+  const out = [];
+  TOPIC_IDS.forEach((id) => {
+    const t = MANDARIN.topics[id];
+    t.words.forEach((w) => out.push({ kind: 'word', topic: t.title, hanzi: w.hanzi, py: toMarks(w.py), plain: plain(w.py), en: w.en }));
+    t.phrases.forEach((p) => out.push({ kind: 'phrase', topic: t.title, hanzi: p.hanzi, py: toMarks(p.py, true), plain: plain(p.py), en: p.en }));
+  });
+  return out;
+}
+
+function lookupText(rawQuery) {
+  const q = cleanText(rawQuery, 60).trim();
+  if (q === '') throw new SkillError("Field 'query' is empty.");
+  const entries = allEntries();
+  const qLower = q.toLowerCase();
+  const qPlain = plain(q);
+  const wordRe = new RegExp('\\b' + qLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  const scored = [];
+  entries.forEach((e) => {
+    let s = 0;
+    if (HAN.test(q)) {
+      if (e.hanzi.replace(/[！？。，]/g, '') === q) s = 5;
+      else if (e.hanzi.indexOf(q) >= 0) s = 3;
+    } else {
+      if (wordRe.test(e.en)) s = Math.max(s, 3);
+      else if (e.en.toLowerCase().indexOf(qLower) >= 0) s = Math.max(s, 1);
+      if (qPlain.length >= 2) {
+        if (e.plain === qPlain) s = Math.max(s, 4);
+        else if (e.plain.indexOf(qPlain) >= 0) s = Math.max(s, 2);
+      }
+    }
+    if (s > 0) scored.push({ e, s });
+  });
+  scored.sort((a, b) => b.s - a.s || (a.e.kind === b.e.kind ? 0 : a.e.kind === 'word' ? -1 : 1) || a.e.hanzi.length - b.e.hanzi.length);
+  if (scored.length === 0) {
+    const nWords = entries.filter((e) => e.kind === 'word').length;
+    return [
+      `No entry for ${quoteData(q)} in this beginner list (${nWords} words and ${entries.length - nWords} phrases in ${TOPIC_IDS.length} topics).`,
+      `I do not make up translations. Try another word, a topic lesson (${TOPIC_IDS.join(', ')}), or a dictionary app.`,
+      FOOTER,
+    ].join('\n');
+  }
+  const shown = scored.slice(0, 6);
+  const lines = [`Mandarin lookup: ${quoteData(q)} (${scored.length} match${scored.length === 1 ? '' : 'es'})`];
+  shown.forEach((x) => lines.push(`- ${x.e.hanzi} ${x.e.py} — ${x.e.en} [${x.e.topic}; ${x.e.kind}]`));
+  if (scored.length > shown.length) lines.push(`(+${scored.length - shown.length} more)`);
+  lines.push(FOOTER);
+  return lines.join('\n');
+}
+
+// ---- Entry point ----------------------------------------------------------------------------------------
+
+function mandarin(input) {
+  const mode = isGiven(input.mode) ? pick(input.mode, MODES, MODE_ALIASES, 'mode') : (isGiven(input.query) ? 'lookup' : 'lesson');
+  if (mode === 'lookup') {
+    if (!isGiven(input.query)) throw new SkillError("Field 'query' is required for lookup: give an English word, pinyin or Chinese characters.");
+    return lookupText(input.query);
+  }
+  if (mode === 'tones') return tonesText();
+  if (mode === 'mistakes') return mistakesText();
+  const topic = isGiven(input.topic) ? pick(input.topic, TOPIC_IDS, TOPIC_ALIASES, 'topic') : null;
+  if (mode === 'quiz') return quizText(topic, Date.now());
+  return lessonText(topic || 'introductions');
+}
+
+registerSkill(mandarin);
+
+</script>
+</body>
+</html>

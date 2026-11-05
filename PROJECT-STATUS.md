@@ -23,9 +23,11 @@ Labels: **Verified** (tried on the phone) · **Tested locally** (automated tests
 
 ## Decisions and corrections
 - Hosting must be **GitHub Pages** with `.nojekyll`; `raw.githubusercontent.com` does not work for JS skills (see research doc s3). The load URL is the skill folder.
-- `site.config.json` holds a placeholder GitHub username; replace it before using the load URLs in `CATALOG.md`.
+- **Published 04/11/2026:** public repository https://github.com/taza1/my-gemma-skills with GitHub Pages on (branch `main`, root). `site.config.json` holds `taza1`, so the load URLs in `CATALOG.md` and the news skill's `Api-User-Agent` point at the real repository. The repository is public, so everything in it can be read by anyone; third-party email addresses were removed from the saved test data first. Mandarin was published unfinished and is labelled so. **Hosting checked 05/11/2026:** all 7 skill addresses serve `SKILL.md` as raw text and `scripts/index.html` as HTML, names match their folders, and no placeholder is left. (The first deployment took about 20 minutes because GitHub Actions and Pages were degraded at the time.) This proves the hosting, not the skills: no skill is **Verified** until you have run it in the app.
 - Skills are keyless. No `require-secret` skill will be built without approval.
 
 ## Open: needs you
-1. Create the public repo `my-gemma-skills`, push, enable GitHub Pages (branch `main`, folder `/ (root)`), and tell me your username so the catalogue URLs can be filled in.
-2. Run the on-device checklist (`docs/ON-DEVICE-CHECKLIST.md`) for unit-converter on E2B and E4B.
+1. ~~Create the public repo, push, enable Pages, fill in the username~~ Done 04/11/2026.
+2. Run the on-device checklist (`docs/ON-DEVICE-CHECKLIST.md`) for the skills on E2B and E4B, starting with unit-converter. This is the step that can move a skill to **Verified**.
+3. Turn on two-factor sign-in for the GitHub account (anyone who can push to the repository changes the code that runs on the phone; see `docs/SECURITY.md`).
+4. Have a Mandarin speaker check `data/mandarin.json`.
